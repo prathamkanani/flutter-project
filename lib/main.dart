@@ -5,7 +5,7 @@ import 'package:demo_project/views/register_view.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'dart:developer' as devtools show log;
+// import 'dart:developer' as devtools show log;
 
 void main() {
   /// It ensures that the essential low-level services needed to run a Flutter app are set up before the runApp() function is called.
@@ -29,6 +29,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login/': (context) => const LoginView(),
         '/register/': (context) => const RegisterView(),
+        '/notes/': (context) => const NotesView(),
       },
     );
   }
@@ -87,7 +88,10 @@ class _NotesViewState extends State<NotesView> {
           PopupMenuButton<MenuAction>(
             onSelected: (value) async {
               final shouldLogout = await showLogOutDialog(context);
-              devtools.log(shouldLogout.toString());
+              if (shouldLogout) {
+                await FirebaseAuth.instance.signOut();
+                if(mounted) Navigator.of(context).pushNamedAndRemoveUntil('/login/', (_) => false);
+              }
             },
             itemBuilder: (context) {
               return const [
