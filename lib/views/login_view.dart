@@ -1,9 +1,9 @@
 import 'package:demo_project/constants/routes.dart';
 import 'package:demo_project/firebase_options.dart';
+import 'package:demo_project/utilities/show_error_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'dart:developer' as devtools show log;
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -102,19 +102,32 @@ class _LoginViewState extends State<LoginView> {
                                   email: email,
                                   password: password,
                                 );
-                            if(context.mounted) {
+                            if (context.mounted) {
                               Navigator.of(context).pushNamedAndRemoveUntil(
-                              notesRoute,
-                              (route) => false,
+                                notesRoute,
+                                (route) => false,
                               );
                             }
                           } on FirebaseAuthException catch (e) {
-                            if (e.code == "user-not-found") {
-                              devtools.log("User not found");
-                            } else if (e.code == "wrong-password") {
-                              devtools.log("Wrong Password");
-                            } else if (e.code == "invalid-email") {
-                              devtools.log("Invalid email");
+                            if (context.mounted && e.code == "user-not-found") {
+                              await showErrorDialog(context, 'User not found!');
+                            } else if (context.mounted &&
+                                e.code == "wrong-password") {
+                              await showErrorDialog(context, 'Wrong Password!');
+                            } else if (context.mounted &&
+                                e.code == "invalid-email") {
+                              await showErrorDialog(context, 'Invalid Email!');
+                            } else {
+                              if (context.mounted) {
+                                await showErrorDialog(
+                                  context,
+                                  'Error ${e.code}',
+                                );
+                              }
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              await showErrorDialog(context, e.toString());
                             }
                           }
                         },
@@ -129,9 +142,10 @@ class _LoginViewState extends State<LoginView> {
                       ),
                       TextButton(
                         onPressed: () {
-                          Navigator.of(
-                            context,
-                          ).pushNamedAndRemoveUntil(registerRoute, (_) => false);
+                          Navigator.of(context).pushNamedAndRemoveUntil(
+                            registerRoute,
+                            (_) => false,
+                          );
                         },
                         child: const Text(
                           "Not registered yet? Register here!",

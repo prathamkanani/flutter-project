@@ -1,5 +1,6 @@
 import 'package:demo_project/constants/routes.dart';
 import 'package:demo_project/firebase_options.dart';
+import 'package:demo_project/utilities/show_error_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -104,13 +105,24 @@ class _RegisterViewState extends State<RegisterView> {
                                 );
                             devtools.log(userCredential.toString());
                           } on FirebaseAuthException catch (e) {
-                            if (e.code == "weak-password") {
-                              devtools.log("Weak Password");
-                            } else if (e.code == "email-already-in-use") {
-                              devtools.log("Email already exists");
-                            } else if (e.code == "invalid-email") {
-                              devtools.log("Invalid email");
+                            if (context.mounted && e.code == "weak-password") {
+                              await showErrorDialog(
+                                context,
+                                'Weak Password! Enter a strong password.',
+                              );
+                            } else if (context.mounted && e.code == "email-already-in-use") {
+                              await showErrorDialog(
+                                context,
+                                'Email already in use.',
+                              );
+                            } else if (context.mounted && e.code == "invalid-email") {
+                              await showErrorDialog(
+                                context,
+                                'Invalid email! Enter a valid email.',
+                              );
                             }
+                          } catch (e) {
+                            if(context.mounted) await showErrorDialog(context, e.toString());
                           }
                         },
                         child: const Text(
