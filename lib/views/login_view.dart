@@ -1,3 +1,4 @@
+import 'package:demo_project/constants/routes.dart';
 import 'package:demo_project/firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -101,10 +102,12 @@ class _LoginViewState extends State<LoginView> {
                                   email: email,
                                   password: password,
                                 );
-                            Navigator.of(context).pushNamedAndRemoveUntil(
-                              '/notes/',
+                            if(context.mounted) {
+                              Navigator.of(context).pushNamedAndRemoveUntil(
+                              notesRoute,
                               (route) => false,
-                            );
+                              );
+                            }
                           } on FirebaseAuthException catch (e) {
                             if (e.code == "user-not-found") {
                               devtools.log("User not found");
@@ -128,7 +131,7 @@ class _LoginViewState extends State<LoginView> {
                         onPressed: () {
                           Navigator.of(
                             context,
-                          ).pushNamedAndRemoveUntil('/register/', (_) => false);
+                          ).pushNamedAndRemoveUntil(registerRoute, (_) => false);
                         },
                         child: const Text(
                           "Not registered yet? Register here!",

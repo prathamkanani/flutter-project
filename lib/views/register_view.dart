@@ -1,3 +1,4 @@
+import 'package:demo_project/constants/routes.dart';
 import 'package:demo_project/firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -125,7 +126,7 @@ class _RegisterViewState extends State<RegisterView> {
                         onPressed: () {
                           Navigator.of(
                             context,
-                          ).pushNamedAndRemoveUntil('/login/', (_) => false);
+                          ).pushNamedAndRemoveUntil(loginRoute, (_) => false);
                         },
                         child: const Text(
                           "Already registered? Login here!",
