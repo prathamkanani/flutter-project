@@ -1,3 +1,4 @@
+import 'package:demo_project/constants/routes.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -13,22 +14,60 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Verify the email", style: TextStyle(color: Colors.white)),
+        title: const Text(
+          "Verify the email",
+          style: TextStyle(color: Colors.white),
+        ),
         centerTitle: true,
         backgroundColor: Colors.blue,
       ),
-      body: Column(
-        children: [
-          const Text("Please verify the email address"),
-          const SizedBox(height: 12),
-          TextButton(
-            onPressed: () async {
-              final user = FirebaseAuth.instance.currentUser;
-              await user?.sendEmailVerification();
-            },
-            child: const Text("Send email verification"),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text("We've sent the verification email."),
+              const SizedBox(height: 8),
+              const Text("If you haven't received it yet, click the button below."),
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: () async {
+                  try {
+                    final user = FirebaseAuth.instance.currentUser;
+                    await user?.sendEmailVerification();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: const Text("Verification email sent.")),
+                      );
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("Failed to send email verification: $e"),
+                        ),
+                      );
+                    }
+                  }
+                },
+                child: const Text("Send email verification"),
+              ),
+              const SizedBox(height: 0),
+              TextButton(
+                onPressed: () async {
+                  await FirebaseAuth.instance.signOut();
+                  if (context.mounted) {
+                    Navigator.of(
+                      context,
+                    ).pushNamedAndRemoveUntil(registerRoute, (_) => false);
+                  }
+                },
+                child: const Text("Stuck! Register again!"),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
