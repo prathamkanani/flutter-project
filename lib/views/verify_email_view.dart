@@ -1,6 +1,6 @@
-import 'package:demo_project/constants/routes.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:demo_project/services/auth/auth_service.dart';
+import 'package:demo_project/constants/routes.dart';
 
 class VerifyEmailView extends StatefulWidget {
   const VerifyEmailView({super.key});
@@ -29,23 +29,28 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
             children: [
               const Text("We've sent the verification email."),
               const SizedBox(height: 8),
-              const Text("If you haven't received it yet, click the button below."),
+              const Text(
+                "If you haven't received it yet, click the button below.",
+              ),
               const SizedBox(height: 8),
               TextButton(
                 onPressed: () async {
                   try {
-                    final user = FirebaseAuth.instance.currentUser;
-                    await user?.sendEmailVerification();
+                    AuthService.firebase().sendEmailVerification();
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: const Text("Verification email sent.")),
+                        SnackBar(
+                          content: const Text("Verification email sent."),
+                        ),
                       );
                     }
                   } catch (e) {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text("Failed to send email verification: $e"),
+                          content: Text(
+                            "Failed to send email verification: $e",
+                          ),
                         ),
                       );
                     }
@@ -56,7 +61,7 @@ class _VerifyEmailViewState extends State<VerifyEmailView> {
               const SizedBox(height: 0),
               TextButton(
                 onPressed: () async {
-                  await FirebaseAuth.instance.signOut();
+                  await AuthService.firebase().logOut();
                   if (context.mounted) {
                     Navigator.of(
                       context,

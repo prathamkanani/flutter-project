@@ -1,9 +1,8 @@
-import 'package:demo_project/constants/routes.dart';
-import 'package:demo_project/firebase_options.dart';
-import 'package:demo_project/utilities/show_error_dialog.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:demo_project/services/auth/auth_exceptions.dart';
+import 'package:demo_project/services/auth/auth_service.dart';
 import 'package:flutter/material.dart';
+import 'package:demo_project/constants/routes.dart';
+import 'package:demo_project/utilities/show_error_dialog.dart';
 
 class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
@@ -39,9 +38,7 @@ class _RegisterViewState extends State<RegisterView> {
         backgroundColor: Colors.blue,
       ),
       body: FutureBuilder(
-        future: Firebase.initializeApp(
-          options: DefaultFirebaseOptions.currentPlatform,
-        ),
+        future: AuthService.firebase().initialize(),
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.done:
@@ -97,45 +94,41 @@ class _RegisterViewState extends State<RegisterView> {
                           final password = _password.text;
 
                           try {
-                            await FirebaseAuth.instance
-                                .createUserWithEmailAndPassword(
-                                  email: email,
-                                  password: password,
-                                );
-                            final user = FirebaseAuth.instance.currentUser;
-                            await user?.sendEmailVerification();
+                            await AuthService.firebase().createUser(
+                              email: email,
+                              password: password,
+                            );
+                            AuthService.firebase().sendEmailVerification();
                             if (context.mounted) {
                               Navigator.of(context).pushNamed(verifyEmailRoute);
                             }
-                          } on FirebaseAuthException catch (e) {
-                            if (context.mounted && e.code == "weak-password") {
+                          } on WeakPasswordAuthException {
+                            if (context.mounted) {
                               await showErrorDialog(
                                 context,
                                 'Weak Password! Enter a strong password.',
                               );
-                            } else if (context.mounted &&
-                                e.code == "email-already-in-use") {
+                            }
+                          } on EmailAlreadyInUseAuthException {
+                            if (context.mounted) {
                               await showErrorDialog(
                                 context,
                                 'Email already in use.',
                               );
-                            } else if (context.mounted &&
-                                e.code == "invalid-email") {
+                            }
+                          } on InvalidEmailAuthException {
+                            if (context.mounted) {
                               await showErrorDialog(
                                 context,
                                 'Invalid email! Enter a valid email.',
                               );
-                            } else {
-                              if (context.mounted) {
-                                await showErrorDialog(
-                                  context,
-                                  'Error ${e.code}',
-                                );
-                              }
                             }
-                          } catch (e) {
+                          } on GenericAuthException {
                             if (context.mounted) {
-                              await showErrorDialog(context, e.toString());
+                              await showErrorDialog(
+                                context,
+                                'Failed to register!',
+                              );
                             }
                           }
                         },
